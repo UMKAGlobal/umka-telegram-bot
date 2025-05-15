@@ -7,6 +7,9 @@ TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHANNEL_ID = -4782134982  # ID канала для отправки заявок
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message.chat_id == CHANNEL_ID:
+        return  # Не отвечаем в канале заявок
+
     keyboard = [[InlineKeyboardButton("Записаться в детский сад", callback_data='register_daycare')],
                 [InlineKeyboardButton("Получить информацию о летнем лагере", callback_data='info_camp')],
                 [InlineKeyboardButton("Узнать о поступлении в 1 класс", callback_data='info_school')],
@@ -17,6 +20,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if update.message.chat_id == CHANNEL_ID:
+        return  # Не отвечаем в канале заявок
+
     keyboard = [[InlineKeyboardButton("Записаться в детский сад", callback_data='register_daycare')],
                 [InlineKeyboardButton("Получить информацию о летнем лагере", callback_data='info_camp')],
                 [InlineKeyboardButton("Узнать о поступлении в 1 класс", callback_data='info_school')]]
@@ -49,8 +55,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_name = update.message.from_user.username or update.message.from_user.full_name
     chat_id = update.message.chat_id
 
+    # Проверяем, что сообщение не отправлено из канала
+    if chat_id == CHANNEL_ID:
+        return
+
     # Проверяем тип заявки
-    if user_message.lower() in ["хочу в лагерь", "хочу в 1 класс", "/camp", "/school", "/register"] or chat_id != CHANNEL_ID:
+    if user_message.lower() in ["хочу в лагерь", "хочу в 1 класс", "/camp", "/school", "/register"]:
         # Формируем сообщение для канала
         message_to_channel = f"📬 Новая заявка от пользователя @{user_name} (ID: {chat_id}):\n\n{user_message}"
 
