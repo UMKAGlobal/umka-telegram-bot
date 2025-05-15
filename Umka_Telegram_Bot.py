@@ -10,14 +10,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.chat_id == CHANNEL_ID:
         return  # Не отвечаем в канале заявок
 
-    keyboard = [[InlineKeyboardButton("Записаться в детский сад", callback_data='register_daycare')],
-                [InlineKeyboardButton("Получить информацию о летнем лагере", callback_data='info_camp')],
-                [InlineKeyboardButton("Узнать о поступлении в 1 класс", callback_data='info_school')],
-                [InlineKeyboardButton("Главное меню", callback_data='main_menu')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(
-        "Добро пожаловать в UMKA Bilingual School & Kindergarten!\nЧем я могу помочь?", reply_markup=reply_markup
-    )
+    # Проверяем, что это не дублирующее приветственное сообщение
+    if update.message.chat.type == 'private':
+        keyboard = [[InlineKeyboardButton("Записаться в детский сад", callback_data='register_daycare')],
+                    [InlineKeyboardButton("Получить информацию о летнем лагере", callback_data='info_camp')],
+                    [InlineKeyboardButton("Узнать о поступлении в 1 класс", callback_data='info_school')],
+                    [InlineKeyboardButton("Главное меню", callback_data='main_menu')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            "Добро пожаловать в UMKA Bilingual School & Kindergarten!\nЧем я могу помочь?", reply_markup=reply_markup
+        )
 
 async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message.chat_id == CHANNEL_ID:
