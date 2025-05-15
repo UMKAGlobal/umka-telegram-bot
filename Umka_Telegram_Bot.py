@@ -50,7 +50,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     chat_id = update.message.chat_id
 
     # Проверяем тип заявки
-    if user_message.lower() in ["хочу в лагерь", "хочу в 1 класс"] or chat_id != CHANNEL_ID:
+    if user_message.lower() in ["хочу в лагерь", "хочу в 1 класс", "/camp", "/school", "/register"] or chat_id != CHANNEL_ID:
         # Формируем сообщение для канала
         message_to_channel = f"📬 Новая заявка от пользователя @{user_name} (ID: {chat_id}):\n\n{user_message}"
 
@@ -67,6 +67,9 @@ async def run_bot():
         app = ApplicationBuilder().token(TOKEN).build()
         app.add_handler(CommandHandler("start", start))
         app.add_handler(CommandHandler("menu", main_menu))  # Добавляем команду меню
+        app.add_handler(CommandHandler("camp", handle_message))  # Добавляем обработку команды /camp
+        app.add_handler(CommandHandler("school", handle_message))  # Добавляем обработку команды /school
+        app.add_handler(CommandHandler("register", handle_message))  # Добавляем обработку команды /register
         app.add_handler(CallbackQueryHandler(handle_button_click))
         app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))  # Обрабатываем все текстовые сообщения
 
