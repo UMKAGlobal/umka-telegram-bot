@@ -1,7 +1,7 @@
 import asyncio
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
 TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHANNEL_ID = -4782134982  # ID канала для отправки заявок
@@ -33,21 +33,29 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_message = update.message.text
+    user_message = update.message.text.strip()
     user_name = update.message.from_user.username or update.message.from_user.full_name
     chat_id = update.message.chat_id
 
-    message_to_channel = f"📬 Новая заявка от пользователя @{user_name} (ID: {chat_id}):\n\n{user_message}"
+    # Проверяем тип заявки
+    if user_message.lower() in ["хочу в лагерь", "хочу в 1 класс"] or chat_id != CHANNEL_ID:
+        # Формируем сообщение для канала
+        message_to_channel = f"📬 Новая заявка от пользователя @{user_name} (ID: {chat_id}):\n\n{user_message}"
 
-    # Отправляем сообщение в канал
-    await context.bot.send_message(chat_id=CHANNEL_ID, text=message_to_channel)
+        # Отправляем сообщение в канал
+        await context.bot.send_message(chat_id=CHANNEL_ID, text=message_to_channel)
+
+        # Отправляем подтверждение клиенту
+        await update.message.reply_text(
+            "Спасибо за заявку, наш менеджер Юлия в скором времени свяжется с вами!"
+        )
 
 async def run_bot():
     try:
         app = ApplicationBuilder().token(TOKEN).build()
         app.add_handler(CommandHandler("start", start))
         app.add_handler(CallbackQueryHandler(handle_button_click))
-        app.add_handler(CommandHandler("register", handle_message))  # Добавляем обработчик сообщений
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))  # Обрабатываем все текстовые сообщения
 
         print("Bot is running...")
         await app.initialize()
