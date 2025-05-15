@@ -9,10 +9,20 @@ CHANNEL_ID = -4782134982  # ID канала для отправки заявок
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [[InlineKeyboardButton("Записаться в детский сад", callback_data='register_daycare')],
                 [InlineKeyboardButton("Получить информацию о летнем лагере", callback_data='info_camp')],
-                [InlineKeyboardButton("Узнать о поступлении в 1 класс", callback_data='info_school')]]
+                [InlineKeyboardButton("Узнать о поступлении в 1 класс", callback_data='info_school')],
+                [InlineKeyboardButton("Главное меню", callback_data='main_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
         "Добро пожаловать в UMKA Bilingual School & Kindergarten!\nЧем я могу помочь?", reply_markup=reply_markup
+    )
+
+async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    keyboard = [[InlineKeyboardButton("Записаться в детский сад", callback_data='register_daycare')],
+                [InlineKeyboardButton("Получить информацию о летнем лагере", callback_data='info_camp')],
+                [InlineKeyboardButton("Узнать о поступлении в 1 класс", callback_data='info_school')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(
+        "Выберите интересующую вас информацию:", reply_markup=reply_markup
     )
 
 async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -31,6 +41,8 @@ async def handle_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
         await query.edit_message_text(
             text="Поступление в 1 класс (2025 учебный год)\n\nСовместная программа с The First Academy, адаптация первоклассников и мягкий переход от детского сада.\n\nНапишите 'Хочу в 1 класс', чтобы узнать больше!"
         )
+    elif query.data == 'main_menu':
+        await main_menu(update, context)
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_message = update.message.text.strip()
@@ -54,6 +66,7 @@ async def run_bot():
     try:
         app = ApplicationBuilder().token(TOKEN).build()
         app.add_handler(CommandHandler("start", start))
+        app.add_handler(CommandHandler("menu", main_menu))  # Добавляем команду меню
         app.add_handler(CallbackQueryHandler(handle_button_click))
         app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))  # Обрабатываем все текстовые сообщения
 
